@@ -1,113 +1,4 @@
-import sys
-
-
-class Tetromino:
-    """Tetromino represents a geometric shape composed of four squares,
-    connected orthogonally.
-
-    Shapes of each tetromino is associated with the alphabet it closely
-    represents. The tetromino list are created to be visually similar to the
-    shape they represent i.e. the top of the tetromino is at index = 0, and
-    bottom of tetromino is at index = N.
-    Thus, a Tetromino's bottom row is not zero indexed to keep the orientation
-    intact.
-
-     For example:
-     Tetromino shape 'T' has the geometric shape as follows:
-
-     │          │
-     │   ###    │
-     │    #     │
-     └──────────┘
-
-    Tetromino shape 'T' represented in a Python list object with the
-    orientation intact as follows using binary digits:
-        1 = occupied
-        0 = empty space
-
-        [
-            [1, 1, 1],
-            [0, 1, 0]
-        ]
-
-    Example:
-    >>> piece = Tetromino('T')
-    >>> print(piece.body)
-        ((1, 1, 1), (0, 1, 0))
-
-    >>> piece.flip()
-    >>> print(piece.body)
-        ((0, 1, 0), (1, 1, 1))
-    """
-
-    # The body is an tuple that denotes a specific shape of a tetromino
-    body: tuple[tuple[int, ...], ...]
-
-    # The peaks of a tetromino piece is a tuple where each element of the
-    # tuple represents the "highest" non-empty space that appears in
-    # the body for each vertical position in the piece.
-    peaks: tuple[int, ...]
-
-    # Available geometric shapes
-    SHAPES = {
-        'Q': ((1, 1), (1, 1)),
-        'Z': ((1, 1, 0), (0, 1, 1)),
-        'S': ((0, 1, 1), (1, 1, 0)),
-        'T': ((1, 1, 1), (0, 1, 0)),
-        'I': ((1, 1, 1, 1),),
-        'L': ((1, 0), (1, 0), (1, 1)),
-        'J': ((0, 1), (0, 1), (1, 1))
-    }
-
-    def __init__(self, shape):
-        self.body = self.SHAPES[shape]
-        self.compute_peaks()
-
-    def compute_peaks(self) -> None:
-        """
-        Computes the peaks of a tetromino piece.
-
-        Example:
-        >>> shape_t = Tetromino('L')
-        >>> print(shape_l.body)
-        ((1, 0), (1, 0), (1, 1))
-
-        >>> print(shape_l.peaks)
-        (3, 1)
-
-        Explanation:
-        The hightest non-empty tile for shape_l are as follows:
-        - For column 0, highest occupied tile is at row 0
-        - For column 1, highest occupied tile is at row 2
-        """
-        height = len(self.body)
-        width = len(self.body[0])
-        peaks = [0] * width
-
-        for col in range(width):
-            for row in range(len(self.body)):
-                if row == 0 and self.body[row][col] == 1:
-                    peaks[col] = height
-                elif peaks[col] == 0 and self.body[row][col] == 1:
-                    peaks[col] = height-row
-
-        # Update the peaks
-        self.peaks = tuple(peaks)
-
-    def flip(self) -> None:
-        """Flip a tetromino piece horizontally i.e. on x-axis
-
-        Example:
-        >>> shape_t = Tetromino('T')
-        >>> print(shape_t.body)
-        ((1, 1, 1), (0, 1, 0))
-
-        >>> shape_t.flip()
-        >>> print(shape_t.body)
-        ((1, 0, 1), (0, 1, 0))
-        """
-        # Flip the tuple by reversing it idiomatically :)
-        self.body = self.body[::-1]
+from src import tetromino
 
 
 class TetrisGrid:
@@ -118,7 +9,7 @@ class TetrisGrid:
 
     Example:
     >>> grid = TetrisGrid(5,5)
-    >>> shape_t = Tetromino('T')
+    >>> shape_t = tetromino.Tetromino('T')
 
     >>> # Let's flip the tetromino and place it
     >>> shape_t.flip()
@@ -159,7 +50,7 @@ class TetrisGrid:
         """Returns grid's total number of columns"""
         return len(self.grid[0])
 
-    def _place(self, piece: Tetromino, x_pos: int, y_pos: int) -> None:
+    def _place(self, piece: tetromino.Tetromino, x_pos: int, y_pos: int) -> None:
         """Places a Tetromino on the grid"""
 
         for row, pair in enumerate(piece.body):
@@ -170,7 +61,7 @@ class TetrisGrid:
                 # Place piece on grid
                 self.grid[y_pos + row][x_pos + col] = tile
 
-    def _update_peaks(self, piece: Tetromino, x_pos: int, y_pos: int) -> None:
+    def _update_peaks(self, piece: tetromino.Tetromino, x_pos: int, y_pos: int) -> None:
         """Updates max heights of each column based on a tetromino's peaks"""
         for index, peak in enumerate(piece.peaks):
             current_height: int = y_pos + peak
@@ -181,7 +72,9 @@ class TetrisGrid:
         """Increases the grid buffer by size (default=1)"""
         self.grid.extend([[0] * self.grid_width] * buffer)
 
-    def check_collision(self, piece: Tetromino, x_pos: int, y_pos: int) -> bool:
+    def check_collision(
+        self, piece: tetromino.Tetromino, x_pos: int, y_pos: int
+    ) -> bool:
         """Returns True if a Tetromino can be placed at given place in grid"""
 
         # Iterate over each cell to find the collision point.
@@ -192,9 +85,11 @@ class TetrisGrid:
                     continue
 
                 # If it collides, return True
-                if (y_pos + row >= len(self.grid) or
-                        x_pos + col >= len(self.grid[0]) or
-                        self.grid[y_pos + row][x_pos + col] != 0):
+                if (
+                    y_pos + row >= len(self.grid)
+                    or x_pos + col >= len(self.grid[0])
+                    or self.grid[y_pos + row][x_pos + col] != 0
+                ):
                     return True
         return False
 
@@ -230,9 +125,9 @@ class TetrisGrid:
         self.increase_buffer(len(rows_to_clear))
 
         # Recompute heights
-        self.peaks = [h-len(rows_to_clear) for h in self.peaks]
+        self.peaks = [h - len(rows_to_clear) for h in self.peaks]
 
-    def place_piece(self, piece: Tetromino, position: int):
+    def place_piece(self, piece: tetromino.Tetromino, position: int):
         """Checks if a piece can be placed on grid and then places it.
 
         To simulate falling of tetrominos, and based on the problem statement
@@ -270,26 +165,3 @@ class TetrisGrid:
         """Returns the max ceiling height of grid"""
         self.clear_full_rows()
         print(max(self.peaks))
-
-
-def process_input(input_line: str):
-    """Constructs a TetrisGrid and processes a line of tetromino pieces"""
-    pieces = input_line.split(',')
-    grid = TetrisGrid()
-
-    for piece in pieces:
-        tetromino, column = Tetromino(piece[0]), int(piece[1:])
-        grid.place_piece(tetromino, column)
-        grid.clear_full_rows()
-
-    # Let's print the max height amongst all columns in the grid.
-    grid.print_ceiling_height()
-
-
-def main():
-    for line in sys.stdin:
-        process_input(line.strip())
-
-
-if __name__ == "__main__":
-    main()
