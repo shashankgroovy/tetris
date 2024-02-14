@@ -1,0 +1,4 @@
+from src.tetris import main
+
+if __name__ == "__main__":
+    main()

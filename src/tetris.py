@@ -14,13 +14,12 @@ def process_input(input_line: str):
         game.clear_full_rows()
 
     # Let's print the max height amongst all columns in the game.
-    game.print_ceiling_height()
+    print(game.get_ceiling_height())
 
 
 def main():
-    for line in sys.stdin:
-        process_input(line.strip())
-
-
-if __name__ == "__main__":
-    main()
+    try:
+        for line in sys.stdin:
+            process_input(line.strip())
+    except KeyboardInterrupt:
+        print("Terminating")

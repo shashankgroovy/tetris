@@ -1,7 +1,10 @@
 all: build
 
 install:
-	pip install pyinstaller
+	pip install -r requirements.txt
+
+install-dev:
+	pip install -r dev-requirements.txt
 
 build: install
 	pyinstaller src/tetris.py
@@ -10,3 +13,8 @@ build: install
 clean:
 	-rm -r build dist tetris.spec tetris
 
+format:
+	black src
+
+test: install-dev
+	python -m pytest

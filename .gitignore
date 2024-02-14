@@ -2,3 +2,10 @@
 .idea
 __pycache__
 .pytest_cache
+
+build/
+dist/
+tetris
+tetris.spec
+output.txt
+todo

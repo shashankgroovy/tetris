@@ -5,7 +5,7 @@ class TetrisGrid:
     """TetrisGrid represents a Tetris gameplay grid.
 
     Tetrominos can be places on the grid and helper methods like
-    `print_ceiling_height`.
+    `get_ceiling_height` can be used to compute peak from the grid.
 
     Example:
     >>> grid = TetrisGrid(5,5)
@@ -22,7 +22,7 @@ class TetrisGrid:
      [0, 0, 0, 0, 0],
      [0, 0, 0, 0, 0]]
 
-    >>> grid.print_ceiling_height()
+    >>> grid.get_ceiling_height()
     2
 
     >>> # Let's turn the grid upside-down to see things visually correctly
@@ -98,13 +98,13 @@ class TetrisGrid:
         remaining rows accordingly
 
         Currently, this method scans the entire grid for any filled rows and
-        the simultaneously deletes them. This could become expensive once
-        if grid height becomes infinitely high, since we are assuming
+        then simultaneously deletes them. This could become expensive once
+        grid height becomes infinitely high, since we are assuming
         there will be an infinite stream of falling tetrominos.
 
         To improve this, we can use a tetromino's body height to compute the
         number of rows each tetromino will effect and only clear those
-        rows in O(piece_height) time
+        rows in O(piece_height) time.
         """
 
         # List to capture rows for clearance
@@ -161,7 +161,7 @@ class TetrisGrid:
         self._place(piece, x_pos, y_pos)
         self._update_peaks(piece, x_pos, y_pos)
 
-    def print_ceiling_height(self):
+    def get_ceiling_height(self):
         """Returns the max ceiling height of grid"""
         self.clear_full_rows()
-        print(max(self.peaks))
+        return max(self.peaks)

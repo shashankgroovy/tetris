@@ -37,7 +37,7 @@ class Tetromino:
         ((0, 1, 0), (1, 1, 1))
     """
 
-    # The body is an tuple that denotes a specific shape of a tetromino
+    # The body is a tuple that denotes a specific shape of a tetromino
     body: tuple[tuple[int, ...], ...]
 
     # The peaks of a tetromino piece is a tuple where each element of the
@@ -73,7 +73,7 @@ class Tetromino:
         (3, 1)
 
         Explanation:
-        The hightest non-empty tile for shape_l are as follows:
+        The highest non-empty tile for shape_l are as follows:
         - For column 0, highest occupied tile is at row 0
         - For column 1, highest occupied tile is at row 2
         """
@@ -101,7 +101,7 @@ class Tetromino:
 
         >>> shape_t.flip()
         >>> print(shape_t.body)
-        ((1, 0, 1), (0, 1, 0))
+        ((0, 1, 0), (1, 1, 1))
         """
         # Flip the tuple by reversing it idiomatically :)
         self.body = self.body[::-1]
