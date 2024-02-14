@@ -1,11 +1,12 @@
 """
-An automated test suite will be run against your submission. To make sure that it will run well 
-please
-* Add installation instructions to make your `tetris` executable runnable into the README.md.
-    If you are using Python you might also include the dependencies you are introducing
-    with a `requirements.txt` file.
-* Run these sample tests against the executable you have produced. Please note, if you're using
-    Windows you will need to modify the `subprocess.run` command accordingly.
+An automated test suite will be run against your submission. To make sure that
+it will run well please
+* Add installation instructions to make your `tetris` executable runnable into
+  the README.md. If you are using Python you might also include the
+  dependencies you are introducing with a `requirements.txt` file.
+* Run these sample tests against the executable you have produced. Please note,
+  if you're using Windows you will need to modify the `subprocess.run` command
+  accordingly.
 """
 
 import subprocess
