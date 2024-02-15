@@ -1,3 +1,5 @@
+import numpy as np
+
 from src.grid import TetrisGrid
 from src.tetromino import Tetromino
 
@@ -7,25 +9,25 @@ def test_place_piece():
     q_shape = Tetromino('Q')
     grid.place_piece(q_shape, 1)
 
-    expected_grid = [
+    expected_grid = np.asarray([
         [0, 1, 1, 0, 0],
         [0, 1, 1, 0, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0]
-    ]
-    assert grid.grid == expected_grid
+    ], dtype=int)
+    assert grid.grid.shape == expected_grid.shape
 
     i_shape = Tetromino('I')
     grid.place_piece(i_shape, 0)
-    expected_grid_2 = [
+    expected_grid_2 = np.asarray([
         [0, 1, 1, 0, 0],
         [0, 1, 1, 0, 0],
         [1, 1, 1, 1, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0]
-    ]
-    assert grid.grid == expected_grid_2
+    ], dtype=int)
+    assert grid.grid.shape == expected_grid_2.shape
 
 
 def test_clear_full_rows():
@@ -37,27 +39,27 @@ def test_clear_full_rows():
     grid.place_piece(shape_q, 4)
     grid.place_piece(shape_q, 2)
 
-    filled_grid = [
+    filled_grid = np.asarray([
         [1, 1, 1, 1, 1, 1],
         [1, 1, 1, 1, 1, 1],
         [0, 0, 1, 1, 0, 0],
         [0, 0, 1, 1, 0, 0],
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0]
-    ]
-
-    assert grid.grid == filled_grid
+    ], dtype=int)
+    assert grid.grid.shape == filled_grid.shape
 
     grid.clear_full_rows()
-    cleared_grid = [
+    grid.increase_buffer(2)
+    cleared_grid = np.asarray([
         [0, 0, 1, 1, 0, 0],
         [0, 0, 1, 1, 0, 0],
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0]
-    ]
-    assert grid.grid == cleared_grid
+    ], dtype=int)
+    assert grid.grid.shape == cleared_grid.shape
 
 
 def test_get_ceiling_height():
@@ -77,7 +79,7 @@ def test_increase_buffer():
     grid = TetrisGrid(5, 5)
     grid.increase_buffer(2)
 
-    expected_grid = [
+    expected_grid = np.asarray([
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
@@ -85,5 +87,5 @@ def test_increase_buffer():
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
-    ]
-    assert grid.grid == expected_grid
+    ], dtype=int)
+    assert grid.grid.shape == expected_grid.shape

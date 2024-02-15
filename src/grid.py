@@ -1,3 +1,4 @@
+import numpy as np
 from src import tetromino
 
 
@@ -35,97 +36,50 @@ class TetrisGrid:
      [0, 0, 1, 0, 0]]
     """
 
-    # A list representing a Tetris grid or board
-    grid: list[list[int]]
-    # A list to track max height of each column in grid
-    peaks: list[int]
-
-    def __init__(self, rows: int = 20, columns: int = 10):
+    def __init__(self, rows: int = 10, columns: int = 10):
         """Initializes a grid with default size of 20 rows and 10 columns"""
-        self.grid = [[0] * columns for _ in range(rows)]
+        self.grid = np.zeros((rows, columns), dtype=int)
+        self.grid_height = rows
+        self.grid_width = columns
         self.peaks = [0] * columns
-
-    @property
-    def grid_width(self) -> int:
-        """Returns grid's total number of columns"""
-        return len(self.grid[0])
 
     def _place(self, piece: tetromino.Tetromino, x_pos: int, y_pos: int) -> None:
         """Places a Tetromino on the grid"""
 
-        for row, pair in enumerate(piece.body):
-            for col, tile in enumerate(pair):
-                # Check for empty space
-                if not tile:
-                    continue
-                # Place piece on grid
-                self.grid[y_pos + row][x_pos + col] = tile
+        self.grid[
+            y_pos : y_pos + len(piece.body), x_pos : x_pos + len(piece.body[0])
+        ] += np.array(piece.body)
 
     def _update_peaks(self, piece: tetromino.Tetromino, x_pos: int, y_pos: int) -> None:
         """Updates max heights of each column based on a tetromino's peaks"""
         for index, peak in enumerate(piece.peaks):
-            current_height: int = y_pos + peak
-            if current_height > self.peaks[x_pos + index]:
-                self.peaks[x_pos + index] = current_height
+            current_height = y_pos + peak
+            self.peaks[x_pos + index] = max(self.peaks[x_pos + index], current_height)
 
     def increase_buffer(self, buffer: int = 1) -> None:
         """Increases the grid buffer by size (default=1)"""
-        self.grid.extend([[0] * self.grid_width] * buffer)
+        new_rows = np.zeros((buffer, self.grid_width), dtype=self.grid.dtype)
+        self.grid = np.vstack([self.grid, new_rows])
 
     def check_collision(
         self, piece: tetromino.Tetromino, x_pos: int, y_pos: int
     ) -> bool:
         """Returns True if a Tetromino can be placed at given place in grid"""
 
-        # Iterate over each cell to find the collision point.
-        for row in range(len(piece.body)):
-            for col in range(len(piece.body[row])):
-                # Check for empty space
-                if piece.body[row][col] == 0:
-                    continue
-
-                # If it collides, return True
-                if (
-                    y_pos + row >= len(self.grid)
-                    or x_pos + col >= len(self.grid[0])
-                    or self.grid[y_pos + row][x_pos + col] != 0
-                ):
-                    return True
-        return False
+        collision_matrix = self.grid[
+            y_pos : y_pos + len(piece.body), x_pos : x_pos + len(piece.body[0])
+        ]
+        return bool(np.any(np.logical_and(piece.body, collision_matrix)))
 
     def clear_full_rows(self) -> None:
         """Clears all the filled rows from the grid and repositions the
-        remaining rows accordingly
-
-        Currently, this method scans the entire grid for any filled rows and
-        then simultaneously deletes them. This could become expensive once
-        grid height becomes infinitely high, since we are assuming
-        there will be an infinite stream of falling tetrominos.
-
-        To improve this, we can use a tetromino's body height to compute the
-        number of rows each tetromino will effect and only clear those
-        rows in O(piece_height) time.
-        """
-
-        # List to capture rows for clearance
-        rows_to_clear = []
-        ceiling = max(self.peaks)
-
-        # Find rows without holes
-        for row in range(ceiling):
-            if 0 not in self.grid[row]:
-                # Mark the row for clearance
-                rows_to_clear.append(row)
-
-        for to_clear in range(len(rows_to_clear) - 1, -1, -1):
-            # Remove the row from the grid
-            self.grid.pop(rows_to_clear[to_clear])
-
-        # Increase grid buffer size
-        self.increase_buffer(len(rows_to_clear))
+        remaining rows accordingly"""
+        rows_to_clear = np.all(self.grid == 1, axis=1)
+        self.grid = self.grid[~rows_to_clear]
 
         # Recompute heights
-        self.peaks = [h - len(rows_to_clear) for h in self.peaks]
+        if np.sum(rows_to_clear) > 0:
+            self.peaks = [h - np.sum(rows_to_clear) for h in self.peaks]
 
     def place_piece(self, piece: tetromino.Tetromino, position: int):
         """Checks if a piece can be placed on grid and then places it.
@@ -155,8 +109,11 @@ class TetrisGrid:
 
         # Check if piece can be placed at desired location in the grid
         while self.check_collision(piece, x_pos, y_pos):
-            # Increment y_pos
             y_pos += 1
+            # Check if we have run out of space
+            if y_pos >= self.grid_height or y_pos + 1 >= self.grid_height:
+                # Double the buffer size
+                self.increase_buffer(self.grid_height * 2)
 
         self._place(piece, x_pos, y_pos)
         self._update_peaks(piece, x_pos, y_pos)

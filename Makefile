@@ -7,8 +7,8 @@ install-dev:
 	pip install -r dev-requirements.txt
 
 build: install
-	pyinstaller src/tetris.py
-	ln -s dist/tetris/tetris tetris
+	pyinstaller --onefile src/__main__.py -n tetris
+	ln -s dist/tetris tetris
 
 clean:
 	-rm -r build dist tetris.spec tetris

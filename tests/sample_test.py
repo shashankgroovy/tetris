@@ -1,7 +1,7 @@
 """
 An automated test suite will be run against your submission. To make sure that
 it will run well please
-* Add installation instructions to make your `tetris` executable runnable into
+*Add installation instructions to make your `tetris` executable runnable into
   the README.md. If you are using Python you might also include the
   dependencies you are introducing with a `requirements.txt` file.
 * Run these sample tests against the executable you have produced. Please note,
@@ -25,7 +25,7 @@ class TestCase:
 
 def run_test(test_case: TestCase):
     p = subprocess.run(
-        ["/bin/bash", ENTRY_POINT],
+        [ENTRY_POINT],
         input=test_case.sample_input,
         capture_output=True,
     )
